@@ -27,6 +27,19 @@ def _cv_mtime():
     return os.path.getmtime(config.CV_PATH)
 
 
+def _client_id():
+    # Behind a reverse proxy (e.g. Streamlit Community Cloud), st.context
+    # .ip_address is typically the proxy's own address (or None), which
+    # would bucket every visitor's usage together under one shared key.
+    # The real client IP is forwarded via a proxy header instead.
+    headers = st.context.headers or {}
+    for header_name in ("X-Forwarded-For", "X-Real-IP"):
+        value = headers.get(header_name)
+        if value:
+            return value.split(",")[0].strip()
+    return st.context.ip_address or "unknown"
+
+
 def _show_pets_link(key):
     # A real button styled like a link, instead of an <a href>: Streamlit
     # forces every anchor click to open in a new tab (to protect the app's
@@ -118,7 +131,7 @@ if question:
     pending_idx = len(st.session_state.messages)
 
     with st.chat_message("assistant"):
-        client_id = st.context.ip_address or "unknown"
+        client_id = _client_id()
         tokens_used = 0
 
         if usage_tracker.is_over_limit(client_id):
