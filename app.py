@@ -105,4 +105,17 @@ if question:
             except Exception as e:
                 answer = f"Sorry, something went wrong while contacting the model: {e}"
         st.markdown(answer)
+
+        combined_text = f"{question} {answer}".lower()
+        if any(keyword in combined_text for keyword in config.DOWNLOAD_KEYWORDS):
+            try:
+                st.download_button(
+                    label=f"Download {config.PERSON_NAME}'s CV (PDF)",
+                    data=_load_cv_bytes(),
+                    file_name=config.CV_PATH,
+                    mime="application/pdf",
+                    key=f"inline_download_{len(st.session_state.messages)}",
+                )
+            except FileNotFoundError:
+                pass
     st.session_state.messages.append(("assistant", answer))

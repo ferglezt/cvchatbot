@@ -38,3 +38,20 @@ SUGGESTED_QUESTIONS = [
     "What's his most recent experience?",
     "How can I contact him?",
 ]
+
+# Background info about the site itself, so the bot can answer meta questions
+# ("what is this?", "who built this?", "can I get the PDF?").
+SITE_INFO = f"""
+This chatbot is a website that lets visitors ask questions about {PERSON_NAME}'s
+resume. It was built by {PERSON_NAME} himself, the same person the resume
+belongs to. It's built with:
+- Streamlit for the web interface
+- LangChain for orchestrating the conversation with the language model
+- DeepSeek's deepseek-chat model for answering questions
+- pypdf for extracting text from the resume PDF
+Visitors can download the original resume PDF at any time using the download
+button in the sidebar, or by asking this assistant for it.
+""".strip()
+
+# Keywords that trigger an inline "download the CV" button in the chat.
+DOWNLOAD_KEYWORDS = ["download", "pdf", ".pdf", "resume file", "cv file", "get his cv", "get his resume"]
