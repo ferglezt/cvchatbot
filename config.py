@@ -20,7 +20,7 @@ ADDITIONAL_INFO = """
 - Languages: Spanish (native), English C2 (fluent)
 - Availability / open to relocation: (add here)
 - Preferred contact method: (add here)
-- Hobbies / interests: BJJ, Soccer goalkeeping, Science fiction, Poker, Chess, Spoil his cats Chucky and Chango
+- Hobbies / interests: BJJ, MMA, Soccer goalkeeping, Science fiction, Anime, Learning Japanese, Poker, Chess, Spoil his cats Chucky and Chango
 """.strip()
 
 # --- Guardrails / limits (tune if needed) ---
@@ -38,8 +38,8 @@ SUGGESTED_QUESTIONS = [
     "What are his main Android skills?",
     "What's his current role?",
     "What's his most recent experience?",
-    "How can I contact him?",
     "What are his hobbies?",
+    "How can I contact him?",
 ]
 
 # When this phrase appears in a chat message, it's turned into a link that

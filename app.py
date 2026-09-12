@@ -27,11 +27,13 @@ def _cv_mtime():
     return os.path.getmtime(config.CV_PATH)
 
 
-def _linkify_pets(text):
-    return text.replace(
-        config.PETS_TRIGGER_PHRASE,
-        f"[{config.PETS_TRIGGER_PHRASE}](?show_pets=1)",
-    )
+def _show_pets_link(key):
+    # A real button styled like a link, instead of an <a href>: Streamlit
+    # forces every anchor click to open in a new tab (to protect the app's
+    # session), so a plain hyperlink can never reveal the photo in-place.
+    if st.button(f"\U0001F43E {config.PETS_TRIGGER_PHRASE}", key=key, type="tertiary"):
+        st.session_state.messages.append(("image", config.PETS_IMAGE_PATH))
+        st.rerun()
 
 
 st.title(f"Ask about {config.PERSON_NAME}")
@@ -80,18 +82,15 @@ except ChatbotError as e:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if st.query_params.get("show_pets"):
-    st.session_state.messages.append(("image", config.PETS_IMAGE_PATH))
-    st.query_params.clear()
-    st.rerun()
-
-for role, content in st.session_state.messages:
+for idx, (role, content) in enumerate(st.session_state.messages):
     if role == "image":
         with st.chat_message("assistant"):
             st.image(content, caption=config.PETS_TRIGGER_PHRASE)
     else:
         with st.chat_message(role):
-            st.markdown(_linkify_pets(content) if role == "assistant" else content)
+            st.markdown(content)
+            if role == "assistant" and config.PETS_TRIGGER_PHRASE in content:
+                _show_pets_link(key=f"pets_link_{idx}")
 
 if config.SUGGESTED_QUESTIONS:
     st.caption("Try asking:")
@@ -114,6 +113,9 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
     st.session_state.messages.append(("user", question))
+    # This is the index the answer will have once appended below, so the
+    # button keeps the same widget key across the rerun that click triggers.
+    pending_idx = len(st.session_state.messages)
 
     with st.chat_message("assistant"):
         client_id = st.context.ip_address or "unknown"
@@ -137,7 +139,9 @@ if question:
                     answer = f"Configuration error: {e}"
                 except Exception as e:
                     answer = f"Sorry, something went wrong while contacting the model: {e}"
-            st.markdown(_linkify_pets(answer))
+            st.markdown(answer)
+            if config.PETS_TRIGGER_PHRASE in answer:
+                _show_pets_link(key=f"pets_link_{pending_idx}")
 
         if tokens_used:
             usage_tracker.add_usage(client_id, tokens_used)
