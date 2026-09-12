@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -11,14 +13,18 @@ st.set_page_config(page_title=f"Chat about {config.PERSON_NAME}", page_icon="\U0
 
 
 @st.cache_data(show_spinner=False)
-def _load_resume_text_cached():
+def _load_resume_text_cached(cv_mtime):
     return load_resume_text(config.CV_PATH)
 
 
 @st.cache_data(show_spinner=False)
-def _load_cv_bytes():
+def _load_cv_bytes(cv_mtime):
     with open(config.CV_PATH, "rb") as f:
         return f.read()
+
+
+def _cv_mtime():
+    return os.path.getmtime(config.CV_PATH)
 
 
 st.title(f"Ask about {config.PERSON_NAME}")
@@ -30,7 +36,7 @@ st.caption(
 with st.sidebar:
     st.header("Resume")
     try:
-        cv_bytes = _load_cv_bytes()
+        cv_bytes = _load_cv_bytes(_cv_mtime())
         st.download_button(
             label="Download CV (PDF)",
             data=cv_bytes,
@@ -59,7 +65,7 @@ questions about — as a way to explore his resume interactively.
         )
 
 try:
-    resume_text = _load_resume_text_cached()
+    resume_text = _load_resume_text_cached(_cv_mtime())
 except ChatbotError as e:
     st.error(str(e))
     st.stop()
@@ -125,7 +131,7 @@ if question:
             try:
                 st.download_button(
                     label=f"Download {config.PERSON_NAME}'s CV (PDF)",
-                    data=_load_cv_bytes(),
+                    data=_load_cv_bytes(_cv_mtime()),
                     file_name=config.CV_PATH,
                     mime="application/pdf",
                     key=f"inline_download_{len(st.session_state.messages)}",
