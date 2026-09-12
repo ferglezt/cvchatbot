@@ -22,7 +22,7 @@ def _load_cv_bytes():
 
 st.title(f"Ask about {config.PERSON_NAME}")
 st.caption(
-    "This assistant answers questions based on the resume shown here. "
+    f"This assistant answers questions about {config.PERSON_NAME}'s professional background. "
     "It won't help with unrelated tasks."
 )
 
