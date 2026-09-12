@@ -27,6 +27,13 @@ def _cv_mtime():
     return os.path.getmtime(config.CV_PATH)
 
 
+def _linkify_pets(text):
+    return text.replace(
+        config.PETS_TRIGGER_PHRASE,
+        f"[{config.PETS_TRIGGER_PHRASE}](?show_pets=1)",
+    )
+
+
 st.title(f"Ask about {config.PERSON_NAME}")
 st.caption(
     f"This assistant answers questions about {config.PERSON_NAME}'s professional background. "
@@ -73,9 +80,18 @@ except ChatbotError as e:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if st.query_params.get("show_pets"):
+    st.session_state.messages.append(("image", config.PETS_IMAGE_PATH))
+    st.query_params.clear()
+    st.rerun()
+
 for role, content in st.session_state.messages:
-    with st.chat_message(role):
-        st.markdown(content)
+    if role == "image":
+        with st.chat_message("assistant"):
+            st.image(content, caption=config.PETS_TRIGGER_PHRASE)
+    else:
+        with st.chat_message(role):
+            st.markdown(_linkify_pets(content) if role == "assistant" else content)
 
 if config.SUGGESTED_QUESTIONS:
     st.caption("Try asking:")
@@ -121,7 +137,7 @@ if question:
                     answer = f"Configuration error: {e}"
                 except Exception as e:
                     answer = f"Sorry, something went wrong while contacting the model: {e}"
-            st.markdown(answer)
+            st.markdown(_linkify_pets(answer))
 
         if tokens_used:
             usage_tracker.add_usage(client_id, tokens_used)

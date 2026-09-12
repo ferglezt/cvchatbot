@@ -20,7 +20,7 @@ ADDITIONAL_INFO = """
 - Languages: Spanish (native), English C2 (fluent)
 - Availability / open to relocation: (add here)
 - Preferred contact method: (add here)
-- Hobbies / interests: BJJ, Soccer goalkeeping, Science fiction, Poker, Chess
+- Hobbies / interests: BJJ, Soccer goalkeeping, Science fiction, Poker, Chess, Spoil his cats Chucky and Chango
 """.strip()
 
 # --- Guardrails / limits (tune if needed) ---
@@ -39,7 +39,13 @@ SUGGESTED_QUESTIONS = [
     "What's his current role?",
     "What's his most recent experience?",
     "How can I contact him?",
+    "What are his hobbies?",
 ]
+
+# When this phrase appears in a chat message, it's turned into a link that
+# reveals the photo below in the chat.
+PETS_TRIGGER_PHRASE = "Chucky and Chango"
+PETS_IMAGE_PATH = "chuckychango.jpg"
 
 # Background info about the site itself, so the bot can answer meta questions
 # ("what is this?", "who built this?", "can I get the PDF?").
