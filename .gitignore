@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .streamlit/
 streamlit.log
+usage_data.json
+usage_data.json.tmp

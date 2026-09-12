@@ -141,16 +141,21 @@ def get_llm() -> ChatOpenAI:
     )
 
 
-def get_response(question: str, history: list[tuple[str, str]], resume_text: str) -> str:
+def get_response(
+    question: str, history: list[tuple[str, str]], resume_text: str
+) -> tuple[str, int]:
     """
     question: the latest (already sanitized) user question
     history: list of (role, content) tuples, role in {"user", "assistant"},
              oldest first — will be truncated to the configured turn limit
     resume_text: extracted resume text
+
+    Returns (answer, total_tokens_used). total_tokens_used is 0 if the
+    model didn't report usage.
     """
     question = sanitize_user_input(question)
     if not question:
-        return "Please ask a question about the candidate's background."
+        return "Please ask a question about the candidate's background.", 0
 
     llm = get_llm()
     system_prompt = build_system_prompt(resume_text)
@@ -167,4 +172,6 @@ def get_response(question: str, history: list[tuple[str, str]], resume_text: str
     messages.append(HumanMessage(content=question))
 
     response = llm.invoke(messages)
-    return response.content
+    usage = getattr(response, "usage_metadata", None) or {}
+    total_tokens = usage.get("total_tokens", 0)
+    return response.content, total_tokens

@@ -2,6 +2,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 import config
+import usage_tracker
 from chatbot import ChatbotError, get_response, load_resume_text
 
 load_dotenv()
@@ -93,18 +94,31 @@ if question:
     st.session_state.messages.append(("user", question))
 
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            try:
-                answer = get_response(
-                    question=question,
-                    history=st.session_state.messages[:-1],
-                    resume_text=resume_text,
-                )
-            except ChatbotError as e:
-                answer = f"Configuration error: {e}"
-            except Exception as e:
-                answer = f"Sorry, something went wrong while contacting the model: {e}"
-        st.markdown(answer)
+        client_id = st.context.ip_address or "unknown"
+        tokens_used = 0
+
+        if usage_tracker.is_over_limit(client_id):
+            answer = (
+                "This chatbot has a daily usage limit to keep API costs in check, "
+                "and your network has reached it for today. Please try again tomorrow."
+            )
+            st.warning(answer)
+        else:
+            with st.spinner("Thinking..."):
+                try:
+                    answer, tokens_used = get_response(
+                        question=question,
+                        history=st.session_state.messages[:-1],
+                        resume_text=resume_text,
+                    )
+                except ChatbotError as e:
+                    answer = f"Configuration error: {e}"
+                except Exception as e:
+                    answer = f"Sorry, something went wrong while contacting the model: {e}"
+            st.markdown(answer)
+
+        if tokens_used:
+            usage_tracker.add_usage(client_id, tokens_used)
 
         combined_text = f"{question} {answer}".lower()
         if any(keyword in combined_text for keyword in config.DOWNLOAD_KEYWORDS):

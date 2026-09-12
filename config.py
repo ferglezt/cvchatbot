@@ -28,6 +28,8 @@ MAX_RESPONSE_TOKENS = 600      # cap on tokens generated per reply
 MAX_INPUT_CHARS = 1500          # cap on a single user question's length
 MAX_HISTORY_TURNS = 5           # how many past exchanges to keep in context
 MAX_RESUME_CHARS = 20000        # safety cap on extracted resume text length
+MAX_TOKENS_PER_IP_PER_DAY = 100_000  # daily token budget per client IP
+USAGE_STORE_PATH = "usage_data.json"  # local file tracking daily usage per IP
 
 CV_PATH = "cv.pdf"
 

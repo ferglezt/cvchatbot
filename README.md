@@ -40,6 +40,11 @@ from the sidebar.
 - User input is sanitized and hard-capped in length (`MAX_INPUT_CHARS`).
 - Conversation history sent to the model is capped (`MAX_HISTORY_TURNS`).
 - Model output is capped via `max_tokens` (`MAX_RESPONSE_TOKENS`).
+- Each client IP has a daily token budget (`MAX_TOKENS_PER_IP_PER_DAY`,
+  default 100,000), tracked in a local `usage_data.json` file. On a
+  single-process host like Streamlit Community Cloud this is a soft
+  guard, not a hard one: that file lives on the container's local disk,
+  so a redeploy or a sleep/wake cycle resets the counters early.
 
 No prompt-based defense is 100% foolproof against a determined attacker —
 this is a defense-in-depth setup, not a guarantee.
